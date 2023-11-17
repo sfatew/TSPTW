@@ -25,5 +25,5 @@ $$ (t_{i}^{'} +s_{i}+ t_{i,j})x_{i,j} \leq b_{j}, \forall (i,j) $$
 
 #### Objective function to be minimized
 * (the time at which the salesman arrived back at the depot)
-$$ Min  (t_{N+1}) $$
+$$ Min(t_{N+1}) $$
           
