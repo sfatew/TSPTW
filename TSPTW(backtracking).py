@@ -4,9 +4,10 @@ from io import StringIO
 import json
 
 with open("data.json", "r") as read_file:
-    doc = json.load(read_file)
+    data = json.loads(read_file)
 
-sys.stdin=StringIO(doc)
+
+sys.stdin=StringIO(data)
 c=[[0,0,0]]
 T=[]
 n=[int(x) for x in sys.stdin.readline().split()]    #number of city

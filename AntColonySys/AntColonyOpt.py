@@ -1,8 +1,12 @@
 import numpy as np
 import sys
 from io import StringIO
-import math
+import json
 
+with open("data.json", "r") as read_file:
+    data = json.loads(read_file)
+
+sys.stdin=StringIO(data)
 c=[[0,0,0]]
 T=[]
 n=[int(x) for x in sys.stdin.readline().split()]    #number of city
