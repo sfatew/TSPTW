@@ -1,11 +1,9 @@
 import sys
 import numpy as np
 from io import StringIO
-import json
 
-with open("data.json", "r") as read_file:
-    data = json.loads(read_file)
-
+with open("data10.txt", "r") as f:  
+  data= f.read()
 
 sys.stdin=StringIO(data)
 c=[[0,0,0]]
