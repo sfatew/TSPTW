@@ -29,5 +29,6 @@ t_i=0   # the time at which the salesman arrived at node i
 visited=[ False for i in range(n+1)]    # mark came points
 
 
+
 def route_construction():
     pass
