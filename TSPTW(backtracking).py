@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from io import StringIO
+import time
 
 with open("data10.txt", "r") as f:  
   data= f.read()
@@ -88,9 +89,13 @@ def Try(k):
         else:
            ti=t1_i
 
-
+begin=time.time()
 Try(1)
 
 print(n)
 print(sol)
 print(' '.join(str(i) for i in sol[1][1:]))
+
+finish=time.time()
+
+print('time taken', finish-begin)
