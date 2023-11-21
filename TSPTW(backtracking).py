@@ -30,7 +30,7 @@ visited=[ False for i in range(n+1)]    # mark came points
 
 t_min= np.inf    # best solution so far
 T_min= np.inf    # shortest segment of the time matrix t
-t1_i=0
+t1_i=0           # the time at which the salesman start service at node i
 stored_ti=[]
 sol=[]
 

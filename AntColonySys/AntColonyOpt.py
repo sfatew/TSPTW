@@ -28,6 +28,10 @@ t_i=0   # the time at which the salesman arrived at node i
 
 visited=[ False for i in range(n+1)]    # mark came points
 
+pheromone=np.zeros((n+1,n+1))           # matrix of pheromone at each arc
+
+evaporation= 0.5                        # evaporation rate
+
 
 
 def route_construction():
