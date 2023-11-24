@@ -28,9 +28,9 @@ t_i=0   # the time at which the salesman arrived at node i
 
 visited=[ False for i in range(n+1)]    # mark came points
 
-pheromone=np.zeros((n+1,n+1))           # matrix of pheromone at each arc
+pheromone=np.full((n+1,n+1),)           # matrix of pheromone at each arc
 
-evaporation= 0.5                        # evaporation rate
+evaporation= 0.3                        # evaporation rate
 
 
 
