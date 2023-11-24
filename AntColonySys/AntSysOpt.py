@@ -1,10 +1,10 @@
 import numpy as np
 import sys
 from io import StringIO
-import json
+import time
 
-with open("data.json", "r") as read_file:
-    data = json.loads(read_file)
+with open("data5.txt", "r") as f:  
+  data= f.read()
 
 sys.stdin=StringIO(data)
 c=[[0,0,0]]
@@ -28,11 +28,13 @@ t_i=0   # the time at which the salesman arrived at node i
 
 visited=[ False for i in range(n+1)]    # mark came points
 
-pheromone=np.full((n+1,n+1),)           # matrix of pheromone at each arc
+pheromone=np.full((n+1,n+1),0)           # matrix of pheromone at each arc
 
 evaporation= 0.3                        # evaporation rate
 
-
+def pheromoneUpdate(i,j):
+    global pheromone
+    pheromone[i][j] = pheromone[i][j] * (1-evaporation) + 
 
 def route_construction():
     pass
