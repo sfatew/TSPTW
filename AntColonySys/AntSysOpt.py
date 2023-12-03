@@ -3,7 +3,7 @@ import sys
 from io import StringIO
 import time
 
-with open("data5.txt", "r") as f:  
+with open("data/data5.txt", "r") as f:  
   data= f.read()
 
 sys.stdin=StringIO(data)
@@ -15,7 +15,7 @@ for i in range(n):
     time_required=[int(x) for x in sys.stdin.readline().split()]           # e(i)=[0]   l(i)=[1]   d(i)=[2]
     c.append(time_required) 
 for i in range(n+1):
-    time_travel=[int(x) for x in sys.stdin.readline().split()]             # array r
+    time_travel=[int(x) for x in sys.stdin.readline().split()]             # travel time array
     T.append(time_travel) 
 T=np.array(T)               #time travel matrix
 
@@ -32,13 +32,8 @@ evaporation= 0.3                        # evaporation rate
 
 prob=np.array([0 for i in range(n+1)])          # prob to go from i to the next node
 
-delta_pheromone=np.zeros((n+1,n+1))
-
 timeTaken=0
 
-
-def pheromoneUpdate(i,j):
-    pheromone = pheromone * (1-evaporation) + delta_pheromone
 
 def route_construction(k,i):        
                                     # 1st k : ant kth  (NOTE: ant k start at node k)
@@ -51,8 +46,8 @@ def route_construction(k,i):
     timeTaken=timeTaken + T[route[i-1]][route[i]] 
     timeTaken=max(timeTaken,c[k][0])+ c[k][2]           # time that finished service at node k
     
-    next=path_chosing(k)
     if i!=n+1:
+        next=path_chosing(k)
         route_construction(next,i+1)
 
 
@@ -73,10 +68,24 @@ def path_chosing(j):            #j : we are at the gth node of the route
     return next
 
 def AntSys():
-
-
-    while:
+    global timeTaken
+    Timelst=[0 for i in range(n+1)]
+    Routelst=[0 for i in range(n+1)]
+    # while:
     
-        delta_pheromone=0
-        for k in range(n+1):
+    for k in range(n+1):                    # let k ants travel and store the time & route for each
             route_construction(k,0)
+            timeTaken +=T[route[n]][k]
+            Timelst[k]=timeTaken
+            Routelst[k]=route
+
+    pheromone = pheromone * (1-evaporation)     # caculating pheromone
+    for k in Routelst:      #consider ant kth
+        delta=200/Timelst[k]    #the incraseing of pheromone on each arc travel through    
+                                #(const=200)
+        for i in range(n):
+            pheromone[k[i]][k[i+1]] += delta
+     
+    
+
+        
