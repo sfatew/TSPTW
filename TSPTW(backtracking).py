@@ -3,7 +3,7 @@ import numpy as np
 from io import StringIO
 import time
 
-with open("data10.txt", "r") as f:  
+with open("data/data5.txt", "r") as f:  
   data= f.read()
 
 sys.stdin=StringIO(data)
