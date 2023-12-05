@@ -34,6 +34,9 @@ prob=np.array([0 for i in range(n+1)])          # prob to go from i to the next 
 
 timeTaken=0
 
+G=[0 for i in range(n+1)]            #Gij=bj-tj
+
+H=[0 for i in range(n+1)]            #Hij=aj-tj
 
 def route_construction(k,i):        
                                     # 1st k : ant kth  (NOTE: ant k start at node k)
@@ -53,11 +56,19 @@ def route_construction(k,i):
 
 
 def path_chosing(j):            #j : we are at the gth node of the route 
-    for i in range(n):
+    for i in range(n):    
         if visited[i]==False:
+            G[i]= c[i][1] - timeTaken
+            H[i]= c[i][0] - timeTaken
+
+    for i in range(len(G)):
+        if G[i]<0:
+
             #update the prob of chosing the next node 
             # alpha = 1, beta = 1
-            prob[i]= (pheromone**1 * (1/T[j][i])**1)     
+    
+        prob[i]= (pheromone**1 * (1/T[j][i])**1)    
+
     # try:
     prob=prob/sum(prob)
     next=np.random.choice(np.arange(0,(n+1)),p=prob)
@@ -69,10 +80,10 @@ def path_chosing(j):            #j : we are at the gth node of the route
 
 def AntSys():
     global timeTaken
+    # while:
     Timelst=[0 for i in range(n+1)]
     Routelst=[0 for i in range(n+1)]
-    # while:
-    
+
     for k in range(n+1):                    # let k ants travel and store the time & route for each
             route_construction(k,0)
             timeTaken +=T[route[n]][k]
@@ -86,6 +97,5 @@ def AntSys():
         for i in range(n):
             pheromone[k[i]][k[i+1]] += delta
      
-    
+    timeTaken=0
 
-        
