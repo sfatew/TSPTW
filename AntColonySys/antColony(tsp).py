@@ -1,13 +1,13 @@
 import random as rn
 import numpy as np
-from numpy.random import choice as np_choice
+from numpy.random import choice as np_choice, rand
 import sys
 from io import StringIO
 from time import process_time
 
 class AntColony(object):
 
-    def __init__(self, distances, n_ants, n_best, n_iterations, decay, alpha=1, beta=1):
+    def __init__(self, distances, n_ants, n_best, n_iterations, decay, alpha=1, beta=1, qo=0.5):
         """
         Args:
             distances (2D numpy.array): Square matrix of distances. Diagonal is assumed to be np.inf.
@@ -30,6 +30,7 @@ class AntColony(object):
         self.decay = decay
         self.alpha = alpha
         self.beta = beta
+        self.qo= qo
 
     def run(self):
         shortest_path = None
@@ -64,6 +65,7 @@ class AntColony(object):
 
     def gen_path(self, start):
         path = []
+        start=start%(len(self.distances))
         visited = set()
         visited.add(start)
         prev = start
@@ -76,16 +78,19 @@ class AntColony(object):
         return path
 
     def pick_move(self, pheromone, dist, visited):
+        q=rand()
         pheromone = np.copy(pheromone)
         pheromone[list(visited)] = 0
 
         row = pheromone ** self.alpha * (( 1.0 / dist) ** self.beta)
-
-        norm_row = row / row.sum()
-        move = np_choice(self.all_inds, 1, p=norm_row)[0]
+        if q>self.qo:
+            norm_row = row / row.sum()
+            move = np_choice(self.all_inds, 1, p=norm_row)[0]
+        else:
+            move=np.argmax(row)
         return move
 
-with open("tspdata.txt", "r") as f:  
+with open("data/tspdata128.txt", "r") as f:  
   data= f.read()
 
 sys.stdin=StringIO(data)
@@ -100,7 +105,7 @@ for i in range(n):
 distances=np.array(c)   
 
 begin=process_time()
-ant_colony = AntColony(distances, 128, 1, 100, 0.95, alpha=1, beta=3)
+ant_colony = AntColony(distances, 128, 1, 100, 0.9, alpha=1, beta=3, qo=0)
 shortest_path = ant_colony.run()
 print ("shorted_path: {}".format(shortest_path))
 finish=process_time()

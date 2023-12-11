@@ -23,7 +23,6 @@ class AntColony(object):
         """
         self.distances  = distances
         self.pheromone = np.ones(self.distances.shape) / len(distances)
-        self.local_pheronome=0
         self.all_inds = range(len(distances))
         self.n_ants = n_ants
         self.n_best = n_best
@@ -36,18 +35,14 @@ class AntColony(object):
         shortest_path = None
         all_time_shortest_path = ("placeholder", np.inf)
         for i in range(self.n_iterations):
-            self.local_pheronome=np.copy(self.pheromone)
+
             all_paths = self.gen_all_paths()
-            self.interation_pheronome(all_paths)
-
-            local_path=self.best_path(self.local_pheronome)
-            local_shortest_path = [local_path,self.gen_path_dist(local_path)]
-
-            self.spread_pheronome(local_shortest_path)
-            self.pheromone = self.pheromone * self.decay   
+            self.spread_pheronome(all_paths)
 
             path=self.best_path(self.pheromone)
             shortest_path = [path,self.gen_path_dist(path)]
+
+            self.pheromone = self.pheromone * self.decay   
 
             # shortest_path = min(all_paths, key=lambda x: x[1])
 
@@ -56,17 +51,11 @@ class AntColony(object):
 
         return all_time_shortest_path
 
-    def spread_pheronome(self,local_shortest_path):
-            path= local_shortest_path[0]
-            for move in path:
-                self.pheromone[move] += 1.0 / self.distances[move]
-
-    def interation_pheronome(self, all_paths):      #local phoronome for 1 interation
+    def spread_pheronome(self,all_paths):
         for path_set in all_paths:
                 path=path_set[0]
                 for move in path:
-                    self.local_pheronome[move] += 1.0 / self.distances[move]
-
+                    self.pheromone[move] += 1.0 / self.distances[move]
 
     def gen_path_dist(self, path):
         total_dist = 0
@@ -127,7 +116,7 @@ class AntColony(object):
         return path
 
 
-with open("tspdata.txt", "r") as f:  
+with open("data/tspdata128.txt", "r") as f:  
   data= f.read()
 
 sys.stdin=StringIO(data)
@@ -142,7 +131,7 @@ for i in range(n):
 distances=np.array(c)   
 
 begin=process_time()
-ant_colony = AntColony(distances, 128, 1, 100, 0.95, alpha=1, beta=3)
+ant_colony = AntColony(distances, 128, 1, 100, 0.9, alpha=1, beta=3)
 shortest_path = ant_colony.run()
 print ("shorted_path: {}".format(shortest_path))
 finish=process_time()
