@@ -12,7 +12,7 @@ T=[]
 n=[int(x) for x in sys.stdin.readline().split()]    #number of city
 n=n[0]
 for i in range(n):
-    time_required=[int(x) for x in sys.stdin.readline().split()]           # e(i)=[0]   l(i)=[1]   d(i)=[2]
+    time_required=[int(x) for x in sys.stdin.readline().split()]           # start=[0]   end=[1]   service=[2]
     c.append(time_required) 
 for i in range(n+1):
     time_travel=[int(x) for x in sys.stdin.readline().split()]             # array r

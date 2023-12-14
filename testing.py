@@ -5,5 +5,6 @@
 #     print(None)
 
 import numpy as np
-a=[1,3,6,4,9,2]
-print(np.argmax(a))
+a=[[1,3,6,4,9,2],[1,4,3,5,6,8]]
+a=np.array(a)
+print(a[(1,2)])

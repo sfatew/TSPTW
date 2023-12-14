@@ -7,10 +7,10 @@ from time import process_time
 
 class AntColony(object):
 
-    def __init__(self, distances, n_ants, n_best, n_iterations, decay, alpha=1, beta=1, qo=0.5):
+    def __init__(self, time_travel, time_window, n_ants, n_best, n_iterations, decay, alpha=1, beta=1,gamma=1, qo=0.5):
         """
         Args:
-            distances (2D numpy.array): Square matrix of distances. Diagonal is assumed to be np.inf.
+            time_travel (2D numpy.array): Square matrix of time_travel. Diagonal is assumed to be np.inf.
             n_ants (int): Number of ants running per iteration
             n_best (int): Number of best ants who deposit pheromone
             n_iteration (int): Number of iterations
@@ -19,18 +19,21 @@ class AntColony(object):
             beta (int or float): exponent on distance, higher beta give distance more weight. Default=1
 
         Example:
-            ant_colony = AntColony(german_distances, 100, 20, 2000, 0.95, alpha=1, beta=2)          
+            ant_colony = AntColony(german_time_travel, 100, 20, 2000, 0.95, alpha=1, beta=2)          
         """
-        self.distances  = distances
-        self.pheromone = np.ones(self.distances.shape) / len(distances)
-        self.all_inds = range(len(distances))
+        self.time_travel  = time_travel
+        self.time_window = time_window
+        self.pheromone = np.ones(self.time_travel.shape) / len(time_travel)
+        self.all_inds = range(len(time_travel))
         self.n_ants = n_ants
         self.n_best = n_best
         self.n_iterations = n_iterations
         self.decay = decay
         self.alpha = alpha
         self.beta = beta
+        self.gamma=gamma
         self.qo= qo
+        self.time=0     #current travel time
 
     def run(self):
         shortest_path = None
@@ -44,36 +47,45 @@ class AntColony(object):
             self.pheromone = self.pheromone * self.decay            
         return all_time_shortest_path
 
+
     def spread_pheronome(self, all_paths, n_best, shortest_path):
         sorted_paths = sorted(all_paths, key=lambda x: x[1])
         for path, dist in sorted_paths[:n_best]:
             for move in path:
-                self.pheromone[move] += 1.0 / self.distances[move]
+                self.pheromone[move] += 1.0 / (self.time_travel[move])
 
-    def gen_path_dist(self, path):
-        total_dist = 0
-        for ele in path:
-            total_dist += self.distances[ele]
-        return total_dist
+    def gen_time_taken(self, i):     
+        #i=(prev, move)
+        #caculate time taken till node move
+        self.time +=self.time_travel[i]
+        if self.time < self.time_window[i[1]][0]:
+            self.time=self.time_window[i[1]][0]
+            self.time+=self.time_window[i[1]][2]
+        else:
+            self.time+=self.time_window[i[1]][2]
+        return self.time
 
     def gen_all_paths(self):
         all_paths = []
         for i in range(self.n_ants):
+            self.time=0
             path = self.gen_path(0)
-            all_paths.append((path, self.gen_path_dist(path)))
+            all_paths.append((path, self.time))
         return all_paths
 
     def gen_path(self, start):
         path = []
-        start=start%(len(self.distances))
+        start=start%(len(self.time_travel))
         visited = set()
         visited.add(start)
         prev = start
-        for i in range(len(self.distances) - 1):
-            move = self.pick_move(self.pheromone[prev], self.distances[prev], visited)
+        for i in range(len(self.time_travel) - 1):
+            move = self.pick_move(self.pheromone[prev], self.time_travel[prev], visited)
             path.append((prev, move))
+            self.gen_time_taken((prev, move))
             prev = move
             visited.add(move)
+            
         path.append((prev, start)) # going back to where we started    
         return path
 
@@ -90,22 +102,27 @@ class AntColony(object):
             move=np.argmax(row)
         return move
 
-with open("data/tspdata15.txt", "r") as f:  
+with open("data/data10.txt", "r") as f:  
   data= f.read()
 
 sys.stdin=StringIO(data)
-c=[]
+T=[]
+c=[[0,0,0]]
 n=[int(x) for x in sys.stdin.readline().split()]    #number of city
 n=n[0]
 for i in range(n):
+    time_required=[int(x) for x in sys.stdin.readline().split()]           # start=[0]   end=[1]   service=[2]
+    c.append(time_required) #time window matrix
+for i in range(n):
     d=[int(x) for x in sys.stdin.readline().split()]    
     d[i]=np.inf
-    c.append(d) 
+    T.append(d) 
 
-distances=np.array(c)   
+time_travel=np.array(T)   
+time_window=np.array(c)
 
 begin=process_time()
-ant_colony = AntColony(distances, 15, 1, 100, 0.9, alpha=1, beta=3, qo=0)
+ant_colony = AntColony(time_travel,time_window, 10, 1, 100, 0.9, alpha=1, beta=3, gamma=3, qo=0)
 shortest_path = ant_colony.run()
 print ("shorted_path: {}".format(shortest_path))
 finish=process_time()
