@@ -48,7 +48,7 @@ class AntColony(object):
         sorted_paths = sorted(all_paths, key=lambda x: x[1])
         for path, dist in sorted_paths[:n_best]:
             for move in path:
-                self.pheromone[move] += 1.0 / self.distances[move]
+                self.pheromone[move] += 1.0 / dist
 
     def gen_path_dist(self, path):
         total_dist = 0
@@ -65,7 +65,7 @@ class AntColony(object):
 
     def gen_path(self, start):
         path = []
-        start=start%(len(self.distances))
+        start=start%(len(self.distances))       #when the ant number > the number of node, set the ant to node in (0,1,..)
         visited = set()
         visited.add(start)
         prev = start

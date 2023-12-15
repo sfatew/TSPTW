@@ -50,13 +50,13 @@ class AntColony(object):
 
     def spread_pheronome(self, all_paths, n_best, shortest_path):
         sorted_paths = sorted(all_paths, key=lambda x: x[1])
-        for path, dist in sorted_paths[:n_best]:
+        for path, time in sorted_paths[:n_best]:
             for move in path:
-                self.pheromone[move] += 1.0 / (self.time_travel[move])
+                self.pheromone[move] += 1.0 / time
 
     def gen_time_taken(self, i):     
         #i=(prev, move)
-        #caculate time taken till node move
+        #caculate time finish service at node that we move to
         self.time +=self.time_travel[i]
         if self.time < self.time_window[i[1]][0]:
             self.time=self.time_window[i[1]][0]
@@ -101,6 +101,8 @@ class AntColony(object):
         else:
             move=np.argmax(row)
         return move
+
+    def Local_heuristics
 
 with open("data/data10.txt", "r") as f:  
   data= f.read()

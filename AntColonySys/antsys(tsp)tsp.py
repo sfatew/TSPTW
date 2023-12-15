@@ -116,7 +116,7 @@ class AntColony(object):
         return path
 
 
-with open("data/tspdata128.txt", "r") as f:  
+with open("data/tspdata15.txt", "r") as f:  
   data= f.read()
 
 sys.stdin=StringIO(data)
