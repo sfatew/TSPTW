@@ -89,12 +89,12 @@ class AntColony(object):
         path.append((prev, start)) # going back to where we started    
         return path
 
-    def pick_move(self, pheromone, dist, visited):
+    def pick_move(self, pheromone, time, visited):
         q=rand()
         pheromone = np.copy(pheromone)
         pheromone[list(visited)] = 0
 
-        row = pheromone ** self.alpha * (( 1.0 / dist) ** self.beta)
+        row = pheromone ** self.alpha * (( 1.0 / time) ** self.beta)
         if q>self.qo:
             norm_row = row / row.sum()
             move = np_choice(self.all_inds, 1, p=norm_row)[0]
@@ -102,7 +102,8 @@ class AntColony(object):
             move=np.argmax(row)
         return move
 
-    def Local_heuristics
+    def Local_heuristic():
+        pass
 
 with open("data/data10.txt", "r") as f:  
   data= f.read()

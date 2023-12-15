@@ -38,9 +38,9 @@ class AntColony(object):
         for i in range(self.n_iterations):
             all_paths = self.gen_all_paths()
             shortest_path = min(all_paths, key=lambda x: x[1])
-            self.spread_pheronome(all_paths, self.n_best, shortest_path=shortest_path)
             if shortest_path[1] < all_time_shortest_path[1]:
-                all_time_shortest_path = shortest_path            
+                all_time_shortest_path = shortest_path     
+            self.spread_pheronome(all_paths, self.n_best, shortest_path=all_time_shortest_path)       
             self.pheromone = self.pheromone * self.decay            
         return all_time_shortest_path
 
@@ -48,7 +48,10 @@ class AntColony(object):
         sorted_paths = sorted(all_paths, key=lambda x: x[1])
         for path, dist in sorted_paths[:n_best]:
             for move in path:
-                self.pheromone[move] += 1.0 / dist
+                self.pheromone[move] += 1.0 / self.distances[move]
+        [path, dist] = shortest_path
+        for move in path:
+            self.pheromone[move] += 1.0 / self.distances[move]
 
     def gen_path_dist(self, path):
         total_dist = 0
@@ -90,7 +93,7 @@ class AntColony(object):
             move=np.argmax(row)
         return move
 
-with open("data/tspdata15.txt", "r") as f:  
+with open("data/tspdata128.txt", "r") as f:  
   data= f.read()
 
 sys.stdin=StringIO(data)
@@ -105,7 +108,7 @@ for i in range(n):
 distances=np.array(c)   
 
 begin=process_time()
-ant_colony = AntColony(distances, 15, 1, 100, 0.9, alpha=1, beta=3, qo=0)
+ant_colony = AntColony(distances, n, 1, 100, 0.9, alpha=1, beta=3, qo=0)
 shortest_path = ant_colony.run()
 print ("shorted_path: {}".format(shortest_path))
 finish=process_time()
