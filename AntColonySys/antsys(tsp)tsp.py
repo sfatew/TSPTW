@@ -32,25 +32,33 @@ class AntColony(object):
         self.beta = beta
         self.qo = 0
 
-    def _qo(self, interation):
-        return interation/self.n_iterations
+    def _qo(self, interation, interations):
+        return interation/interations
 
     def run(self):
         shortest_path = None
         all_time_shortest_path = ("placeholder", np.inf)
-        for i in range(self.n_iterations):
-            self.qo=self._qo(i)
+        interations = self.n_iterations
+        i=0
+
+        while i < interations:
+            self.qo=self._qo(i, interations)
+            print(self.qo)
             all_paths = self.gen_all_paths()
             self.spread_pheronome(all_paths, self.n_best)
 
             self.pheromone = self.pheromone * self.decay  
+
             path=self.best_path(self.pheromone)
             shortest_path = [path,self.gen_path_dist(path)] 
 
             # shortest_path = min(all_paths, key=lambda x: x[1])
             if shortest_path[1] < all_time_shortest_path[1]:
                 all_time_shortest_path = shortest_path  
-
+                interations += self.n_iterations
+                print(interations)
+            print(all_time_shortest_path)
+            i+=1
         return all_time_shortest_path
 
     def spread_pheronome(self,all_paths, n_best):
@@ -99,10 +107,10 @@ class AntColony(object):
             move=np.argmax(row)
         return move
 
-    def pick_best(self, pheromone, visited):
+    def pick_best(self, pheromone,dist, visited):
         pheromone = np.copy(pheromone)
         pheromone[list(visited)] = 0
-        row = pheromone
+        row = pheromone ** self.alpha * (( 1.0 / dist) ** self.beta)
         move=np.argmax(row)
         return move
     
@@ -112,7 +120,7 @@ class AntColony(object):
         visited.add(0)
         prev = 0
         for i in range(len(self.distances) - 1):
-            move = self.pick_best(pheromone[prev], visited)
+            move = self.pick_best(self.pheromone[prev],self.distances[prev], visited)
             path.append((prev, move))
             prev = move
             visited.add(move)
@@ -120,7 +128,7 @@ class AntColony(object):
         return path
 
 
-with open("data/tspdata128.txt", "r") as f:  
+with open("data/tspdata15.txt", "r") as f:  
   data= f.read()
 
 sys.stdin=StringIO(data)
@@ -135,7 +143,7 @@ for i in range(n):
 distances=np.array(c)   
 
 begin=process_time()
-ant_colony = AntColony(distances, 128, 1, 100, 0.9, alpha=3, beta=1)
+ant_colony = AntColony(distances, n, 1, 20, 0.9, alpha=2, beta=1)
 shortest_path = ant_colony.run()
 print ("shorted_path: {}".format(shortest_path))
 finish=process_time()
