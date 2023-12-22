@@ -30,10 +30,7 @@ class AntColony(object):
         self.decay = decay
         self.alpha = alpha
         self.beta = beta
-        self.qo = 0
 
-    def _qo(self, interation, interations):
-        return interation/interations
 
     def run(self):
         shortest_path = None
@@ -41,11 +38,18 @@ class AntColony(object):
         interations = self.n_iterations
         i=0
 
+
+        sample = rn.sample(range(25,75),5)
+        sample.append(x for x in rn.sample(range(75,125),3))
+        sample.append(x for x in rn.sample(range(125,250),2))
+        sample.append(x for x in rn.sample(range(250,500),1))
+
         while i < interations:
-            self.qo=self._qo(i, interations)
-            print(self.qo)
             all_paths = self.gen_all_paths()
-            self.spread_pheronome(all_paths, self.n_best)
+            if i < 25 or i in sample:
+                self._spread_pheronome(all_paths, self.n_best)
+            else:
+                self._spread_pheronome_gb(all_time_shortest_path)
 
             self.pheromone = self.pheromone * self.decay  
 
@@ -57,15 +61,21 @@ class AntColony(object):
                 all_time_shortest_path = shortest_path  
                 interations += self.n_iterations
                 print(interations)
-            print(all_time_shortest_path)
+            # print(all_time_shortest_path)
             i+=1
         return all_time_shortest_path
 
-    def spread_pheronome(self,all_paths, n_best):
+    def _spread_pheronome(self,all_paths, n_best):
         sorted_paths = sorted(all_paths, key=lambda x: x[1])
         for path, dist in sorted_paths[:n_best]:
             for move in path:
                 self.pheromone[move] += 1.0 / self.distances[move]
+
+    def _spread_pheronome_gb(self,all_time_shortest_path):
+        path, dist = all_time_shortest_path
+        for move in path:
+                self.pheromone[move] += 1.0 / self.distances[move]
+
 
     def gen_path_dist(self, path):
         total_dist = 0
@@ -95,16 +105,15 @@ class AntColony(object):
         return path
 
     def pick_move(self, pheromone, dist, visited):
-        q=rand()
+
         pheromone = np.copy(pheromone)
         pheromone[list(visited)] = 0
 
         row = pheromone ** self.alpha * (( 1.0 / dist) ** self.beta)
-        if q>self.qo:
-            norm_row = row / row.sum()
-            move = np_choice(self.all_inds, 1, p=norm_row)[0]
-        else:
-            move=np.argmax(row)
+
+        norm_row = row / row.sum()
+        move = np_choice(self.all_inds, 1, p=norm_row)[0]
+
         return move
 
     def pick_best(self, pheromone,dist, visited):
