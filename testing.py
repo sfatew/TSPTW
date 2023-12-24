@@ -11,3 +11,12 @@
 # [b,c]=a
 # print(b)
 
+import numpy as np
+i=[[1,2],[4,6]]
+i=np.array(i)
+for a in i:
+    if a>3:
+        idx=i.index(a)
+        i[idx]=3
+
+print(i)

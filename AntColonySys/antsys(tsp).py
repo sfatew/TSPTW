@@ -65,6 +65,10 @@ class AntColony(object):
             else:
                 self._spread_pheronome_gb(all_time_shortest_path)
 
+            for p in self.pheromone:
+                if p > self.maxpheromone:
+                    p = 
+
             i+=1
         return all_time_shortest_path
 
