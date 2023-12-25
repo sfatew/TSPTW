@@ -19,6 +19,7 @@ class AntColony(object):
             alpha (int or float): exponenet on pheromone, higher alpha gives pheromone more weight. Default=1
             beta (int or float): exponent on distance, higher beta give distance more weight. Default=1
             max,min pheromone : pheromone is bounded in the interval (min,max)
+            numconvergence : number of convergence (convergence is when 1 of the fesible edge is max pheromone while the rest is min)
             
         Example:
             ant_colony = AntColony(german_distances, 100, 20, 2000, 0.95, alpha=1, beta=2)          
@@ -28,32 +29,31 @@ class AntColony(object):
         self.all_inds = range(len(distances))
         self.n_ants = n_ants
         self.n_best = n_best
-        self.n_iterations = n_iterations
+        # self.n_iterations = n_iterations
         self.persistence = persistence
         self.alpha = alpha
         self.beta = beta
         self.maxpheromone = 0
         self.minpheromone = 0
+        self.numconvergence = 0
 
     def run(self):
         shortest_path = None
         all_time_shortest_path = ("placeholder", np.inf)
-        interations = self.n_iterations
-        i=0
 
         sample = rn.sample(range(25,75),5)
         sample.append(x for x in rn.sample(range(75,125),3))
         sample.append(x for x in rn.sample(range(125,250),2))
         sample.append(x for x in rn.sample(range(250,500),1))
 
-        while i < interations:
+
+        while self.numconvergence < len(self.distances):
+            self.numconvergence = 0
             all_paths = self.gen_all_paths()
 
             shortest_path = min(all_paths, key=lambda x: x[1])
             if shortest_path[1] < all_time_shortest_path[1]:
                 all_time_shortest_path = shortest_path  
-                interations += self.n_iterations
-                print(interations)
 
                 self.maxpheromone = (1/(1-self.persistence)) * (1/all_time_shortest_path[1])
                 self.minpheromone = self.maxpheromone/(2* len(self.distances))
@@ -65,11 +65,7 @@ class AntColony(object):
             else:
                 self._spread_pheronome_gb(all_time_shortest_path)
 
-            for p in self.pheromone:
-                if p > self.maxpheromone:
-                    p = 
-
-            i+=1
+            print(self.numconvergence)
         return all_time_shortest_path
 
     def _spread_pheronome(self,all_paths, n_best):
@@ -77,11 +73,19 @@ class AntColony(object):
         for path, dist in sorted_paths[:n_best]:
             for move in path:
                 self.pheromone[move] += 1.0 / self.distances[move]
+                if self.pheromone[move] > self.maxpheromone:
+                    self.pheromone[move] = self.maxpheromone
+                if self.pheromone[move] < self.minpheromone:
+                    self.pheromone[move] = self.minpheromone
 
     def _spread_pheronome_gb(self,all_time_shortest_path):
         path, dist = all_time_shortest_path
         for move in path:
                 self.pheromone[move] += 1.0 / self.distances[move]
+                if self.pheromone[move] > self.maxpheromone:
+                    self.pheromone[move] = self.maxpheromone
+                if self.pheromone[move] < self.minpheromone:
+                    self.pheromone[move] = self.minpheromone
 
 
     def gen_path_dist(self, path):
@@ -97,13 +101,14 @@ class AntColony(object):
             all_paths.append((path, self.gen_path_dist(path)))
         return all_paths
 
+
     def gen_path(self, start):
         path = []
         start=start%(len(self.distances))
         visited = set()
         visited.add(start)
         prev = start
-        for i in range(len(self.distances) - 1):
+        for _ in range(len(self.distances) - 1):
             move = self.pick_move(self.pheromone[prev], self.distances[prev], visited)
             path.append((prev, move))
             prev = move
@@ -116,8 +121,25 @@ class AntColony(object):
         pheromone = np.copy(pheromone)
         pheromone[list(visited)] = 0
 
-        row = pheromone ** self.alpha * (( 1.0 / dist) ** self.beta)
+        minnode=0
+        maxnode=0
+        pheromone = list(pheromone)
+        for node in range(len(pheromone)):
+            if pheromone[node] != 0:
+                if pheromone[node] == self.minpheromone:
+                    minnode += 1
+                if pheromone[node] == self.maxpheromone:
+                    maxnode += 1
+        if maxnode == 1 and minnode == len(pheromone) - len(visited) - 1 and minnode != 0:
+            # print(self.maxpheromone)
+            # print(minnode)
+            # print(pheromone)
+            # print(pheromone.index(self.maxpheromone))
+            self.numconvergence += 1 
+            return pheromone.index(self.maxpheromone)
 
+        pheromone=np.array(pheromone)
+        row = pheromone ** self.alpha * (( 1.0 / dist) ** self.beta)
         norm_row = row / row.sum()
         move = np_choice(self.all_inds, 1, p=norm_row)[0]
 
@@ -159,7 +181,7 @@ for i in range(n):
 distances=np.array(c)   
 
 begin=process_time()
-ant_colony = AntColony(distances, n, 1, 20, 0.8, alpha=1, beta=2)
+ant_colony = AntColony(distances, n, 1, 20, 0.6, alpha=1, beta=2)
 shortest_path = ant_colony.run()
 path, dist = shortest_path
 path = deque(path)
