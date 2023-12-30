@@ -44,10 +44,7 @@ class AntColony(object):
         # interations = self.n_iterations
         # i=0
 
-        sample = rn.sample(range(25,75),5)
-        sample.append(x for x in rn.sample(range(75,125),3))
-        sample.append(x for x in rn.sample(range(125,250),2))
-        sample.append(x for x in rn.sample(range(250,500),1))
+        q=rand()
 
         # while i < interations:
         while self.numconvergence < len(self.distances):
@@ -66,7 +63,7 @@ class AntColony(object):
             # print(all_time_shortest_path)
             
             self.pheromone = self.pheromone * self.persistence  
-            if i < 25 or i not in sample:
+            if q>self.qo:
                 self._spread_pheronome(all_paths, self.n_best)
             else:
                 self._spread_pheronome_gb(all_time_shortest_path)

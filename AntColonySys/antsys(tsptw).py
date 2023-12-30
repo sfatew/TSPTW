@@ -41,6 +41,8 @@ class AntColony(object):
     def run(self):
         shortest_path = None
         all_time_shortest_path = ("placeholder", np.inf)
+
+        
         for i in range(self.n_iterations):
             all_paths = self.gen_all_paths()
             shortest_path = min(all_paths, key=lambda x: x[1])
@@ -128,7 +130,7 @@ time_travel=np.array(T)
 time_window=np.array(c)
 
 begin=process_time()
-ant_colony = AntColony(time_travel,time_window, 10, 1, 100, 0.9, alpha=1, beta=3, gamma=3, qo=0)
+ant_colony = AntColony(time_travel,time_window, 10, 1, 100, 0.6, alpha=1, beta=3, gamma=3, qo=0)
 shortest_path = ant_colony.run()
 print ("shorted_path: {}".format(shortest_path))
 finish=process_time()
