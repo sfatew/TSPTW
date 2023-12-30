@@ -41,12 +41,15 @@ class AntColony(object):
         shortest_path = None
         all_time_shortest_path = ("placeholder", np.inf)
 
+        # interations = self.n_iterations
+        # i=0
+
         sample = rn.sample(range(25,75),5)
         sample.append(x for x in rn.sample(range(75,125),3))
         sample.append(x for x in rn.sample(range(125,250),2))
         sample.append(x for x in rn.sample(range(250,500),1))
 
-
+        # while i < interations:
         while self.numconvergence < len(self.distances):
             self.numconvergence = 0
             all_paths = self.gen_all_paths()
@@ -54,6 +57,9 @@ class AntColony(object):
             shortest_path = min(all_paths, key=lambda x: x[1])
             if shortest_path[1] < all_time_shortest_path[1]:
                 all_time_shortest_path = shortest_path  
+
+                # interations += self.n_iterations
+                # print(interations)
 
                 self.maxpheromone = (1/(1-self.persistence)) * (1/all_time_shortest_path[1])
                 self.minpheromone = self.maxpheromone/(2* len(self.distances))
@@ -64,6 +70,8 @@ class AntColony(object):
                 self._spread_pheronome(all_paths, self.n_best)
             else:
                 self._spread_pheronome_gb(all_time_shortest_path)
+
+            # i+=1
 
             print(self.numconvergence)
         return all_time_shortest_path
@@ -181,7 +189,7 @@ for i in range(n):
 distances=np.array(c)   
 
 begin=process_time()
-ant_colony = AntColony(distances, n, 1, 20, 0.6, alpha=1, beta=2)
+ant_colony = AntColony(distances, n, 1, 100, 0.6, alpha=1, beta=2)
 shortest_path = ant_colony.run()
 path, dist = shortest_path
 path = deque(path)
