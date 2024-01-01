@@ -147,6 +147,7 @@ class AntColony(object):
         # pheromone=np.array(pheromone)
 
         row = pheromone ** self.alpha * (( 1.0 / dist) ** self.beta)
+        print(row)
         norm_row = row / row.sum()
         move = np_choice(self.all_inds, 1, p=norm_row)[0]
 
@@ -182,13 +183,13 @@ n=[int(x) for x in sys.stdin.readline().split()]    #number of city
 n=n[0]
 for i in range(n):
     d=[int(x) for x in sys.stdin.readline().split()]    
-    d[i]=np.inf
+    # d[i]=np.inf
     c.append(d) 
 
 distances=np.array(c)   
 
 begin=process_time()
-ant_colony = AntColony(distances, n, 1, 100, 0.4, alpha=1, beta=3, qo=0.3)
+ant_colony = AntColony(distances, 5*n, 1, 100, 0.4, alpha=1, beta=4, qo=0.3)
 shortest_path = ant_colony.run()
 path, dist = shortest_path
 path = deque(path)
