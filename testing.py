@@ -19,15 +19,4 @@ import numpy as np
 # j=j**2
 # print((i*j)[:,1])
 
-a=0
-i=0
-while i<5:
-    if a<4:
-        a += 1
-        print(a)
-        i+=1
-
-    else:
-        print(a)
-        i+=1
-        print(i)
+print(255*0.4)

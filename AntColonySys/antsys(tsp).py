@@ -4,7 +4,7 @@ from numpy.random import choice as np_choice, rand
 import sys
 from io import StringIO
 from collections import deque
-from time import process_time
+from time import process_time, sleep
 
 class AntColony(object):
 
@@ -54,16 +54,17 @@ class AntColony(object):
 
             shortest_path = min(all_paths, key=lambda x: x[1])
             print(shortest_path)
+            sleep(0.1)
             if shortest_path[1] < all_time_shortest_path[1]:
                 all_time_shortest_path = shortest_path  
 
                 interations += self.n_iterations
                 print(interations)
 
-                self.maxpheromone = (1/(1-self.persistence)) * (1/all_time_shortest_path[1])
-                self.minpheromone = self.maxpheromone/(2* len(self.distances))
+                # self.maxpheromone = (1/(1-self.persistence)) * (1/all_time_shortest_path[1])
+                # self.minpheromone = self.maxpheromone/(2* len(self.distances))
                 print(all_time_shortest_path[1])
-            
+
             self.pheromone = self.pheromone * self.persistence  
             if q>self.qo:
                 self._spread_pheronome(all_paths, self.n_best)
@@ -80,19 +81,19 @@ class AntColony(object):
         for path, dist in sorted_paths[:n_best]:
             for move in path:
                 self.pheromone[move] += 1.0 / dist
-                if self.pheromone[move] > self.maxpheromone:
-                    self.pheromone[move] = self.maxpheromone
-                if self.pheromone[move] < self.minpheromone:
-                    self.pheromone[move] = self.minpheromone
+                # if self.pheromone[move] > self.maxpheromone:
+                #     self.pheromone[move] = self.maxpheromone
+                # if self.pheromone[move] < self.minpheromone:
+                #     self.pheromone[move] = self.minpheromone
 
     def _spread_pheronome_gb(self,all_time_shortest_path):
         path, dist = all_time_shortest_path
         for move in path:
                 self.pheromone[move] += 1.0 / dist
-                if self.pheromone[move] > self.maxpheromone:
-                    self.pheromone[move] = self.maxpheromone
-                if self.pheromone[move] < self.minpheromone:
-                    self.pheromone[move] = self.minpheromone
+                # if self.pheromone[move] > self.maxpheromone:
+                #     self.pheromone[move] = self.maxpheromone
+                # if self.pheromone[move] < self.minpheromone:
+                #     self.pheromone[move] = self.minpheromone
 
 
     def gen_path_dist(self, path):
@@ -147,7 +148,7 @@ class AntColony(object):
         # pheromone=np.array(pheromone)
 
         row = pheromone ** self.alpha * (( 1.0 / dist) ** self.beta)
-        print(row)
+        # print(row)
         norm_row = row / row.sum()
         move = np_choice(self.all_inds, 1, p=norm_row)[0]
 
@@ -174,7 +175,7 @@ class AntColony(object):
     #     return path
 
 
-with open("data/tspdata15.txt", "r") as f:  
+with open("data/tspdata128.txt", "r") as f:  
   data= f.read()
 
 sys.stdin=StringIO(data)
@@ -183,7 +184,7 @@ n=[int(x) for x in sys.stdin.readline().split()]    #number of city
 n=n[0]
 for i in range(n):
     d=[int(x) for x in sys.stdin.readline().split()]    
-    # d[i]=np.inf
+    d[i]=np.inf
     c.append(d) 
 
 distances=np.array(c)   

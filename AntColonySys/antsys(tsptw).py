@@ -24,7 +24,7 @@ class AntColony(object):
         """
         self.time_travel  = time_travel
         self.time_window = time_window
-        self.pheromone = np.full(self.time_travel.shape, 9999)
+        self.pheromone = np.full(self.time_travel.shape, 9999, dtype='float64')
         self.all_inds = range(len(time_travel))
         self.n_ants = n_ants
         self.n_best = n_best
@@ -34,13 +34,31 @@ class AntColony(object):
         self.beta = beta
         self.gamma=gamma
         self.qo= qo
-        self.maxpheromone = 0
-        self.minpheromone = 0
+        # self.maxpheromone = 0
+        # self.minpheromone = 0
         # self.numconvergence = 0
         self.time=0     #current travel time
+        self.penalty = self._find_penalty()
+
+    def _find_penalty(self):
+        max_timetravel = 0
+        for i in self.time_travel:
+            for j in i:
+                if j> max_timetravel:
+                    max_timetravel = j
+
+        max_timewindow = 0
+        for j in self.time_window[:,2]:
+                if j> max_timewindow:
+                    max_timewindow = j
+
+        return (max_timetravel + max_timewindow) * len(self.time_travel) * 2
+                    
 
     def run(self):
-        print(self.time_travel)
+        # print(self.time_travel)
+        print(self.penalty)
+        sleep(1)
         shortest_path = None
         all_time_shortest_path = ("placeholder", np.inf)
 
@@ -53,15 +71,17 @@ class AntColony(object):
         while i < interations:
         # while self.numconvergence < len(self.time_travel):
         #     self.numconvergence = 0
+            print(fail_counter)
             all_paths = self.gen_all_paths()
             if len(all_paths) == 0:
                 fail_counter += 1
-                if fail_counter > 10000:
+                # print(fail_counter)
+                if fail_counter > 999:
                     break
                 else:
                     continue
             else:
-                fail_counter = 0
+                fail_counter = 0 
                 shortest_path = min(all_paths, key=lambda x: x[1])
                 print(shortest_path)
                 if shortest_path[1] < all_time_shortest_path[1]:
@@ -70,8 +90,8 @@ class AntColony(object):
                     interations += self.n_iterations
                     print(interations)
 
-                    self.maxpheromone = (1/(1-self.persistence)) * (1/all_time_shortest_path[1])
-                    self.minpheromone = self.maxpheromone/(2* len(self.time_travel))
+                    # self.maxpheromone = (1/(1-self.persistence)) * (1/all_time_shortest_path[1])
+                    # self.minpheromone = self.maxpheromone/(2* len(self.time_travel))
                     print(all_time_shortest_path[1])
                 
                 self.pheromone = self.pheromone * self.persistence  
@@ -89,20 +109,20 @@ class AntColony(object):
         sorted_paths = sorted(all_paths, key=lambda x: x[1])
         for path, time in sorted_paths[:n_best]:
             for move in path:
-                self.pheromone[move] += 1.0 / time
-                if self.pheromone[move] > self.maxpheromone:
-                    self.pheromone[move] = self.maxpheromone
-                if self.pheromone[move] < self.minpheromone:
-                    self.pheromone[move] = self.minpheromone
+                self.pheromone[move] += 999.0 / time
+                # if self.pheromone[move] > self.maxpheromone:
+                #     self.pheromone[move] = self.maxpheromone
+                # if self.pheromone[move] < self.minpheromone:
+                #     self.pheromone[move] = self.minpheromone
 
     def _spread_pheronome_gb(self,all_time_shortest_path):
         path, time = all_time_shortest_path
         for move in path:
-                self.pheromone[move] += 1.0 / time
-                if self.pheromone[move] > self.maxpheromone:
-                    self.pheromone[move] = self.maxpheromone
-                if self.pheromone[move] < self.minpheromone:
-                    self.pheromone[move] = self.minpheromone
+                self.pheromone[move] += 999.0 / time
+                # if self.pheromone[move] > self.maxpheromone:
+                #     self.pheromone[move] = self.maxpheromone
+                # if self.pheromone[move] < self.minpheromone:
+                #     self.pheromone[move] = self.minpheromone
 
     def gen_time_taken(self, i):     
         #i=(prev, move)
@@ -119,6 +139,8 @@ class AntColony(object):
         all_paths = []
         for _ in range(self.n_ants):
             self.time=0
+            # print(self.pheromone)
+            # sleep(0.4)
             path = self.gen_path(0)
             if path != None:
                 all_paths.append((path, self.time))
@@ -136,6 +158,12 @@ class AntColony(object):
             # sleep(0.2)
 
             if move == None:
+                for edge in path:
+                    self.pheromone[edge] = self.pheromone[edge] * self.persistence
+
+                path = (path, self.penalty - self.time)
+                self._spread_pheronome_gb(path)
+
                 return None
             else:
                 path.append((prev, move))
@@ -217,7 +245,7 @@ class AntColony(object):
                 H[i] = 1
         return H
 
-with open("data/data10.txt", "r") as f:  
+with open("data/data900.txt", "r") as f:  
   data= f.read()
 
 sys.stdin=StringIO(data)
@@ -237,7 +265,7 @@ time_travel=np.array(T)
 time_window=np.array(c)
 
 begin=process_time()
-ant_colony = AntColony(time_travel,time_window, n+1, 1, 100, 0.4, alpha=1, beta=3, gamma=4, qo=0.3)
+ant_colony = AntColony(time_travel,time_window, n+1, 1, 100, 0.6, alpha=1, beta=3, gamma=4, qo=0.3)
 shortest_path = ant_colony.run()
 print ("shorted_path: {}".format(shortest_path))
 finish=process_time()
