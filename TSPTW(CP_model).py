@@ -90,9 +90,5 @@ def TSP_TW_CP(filename):
     else:
         print("No solution!")
 
-TSP_TW_CP("10nodes.txt")
+TSP_TW_CP("data/data10.txt")
 
-
-
-
-        
