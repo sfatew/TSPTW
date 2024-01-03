@@ -5,6 +5,7 @@ import sys
 from io import StringIO
 from time import process_time, sleep
 
+
 class AntColony(object):
 
     def __init__(self, time_travel, time_window, n_ants, n_best, n_iterations, persistence, alpha=1, beta=1,gamma=1, qo=0.5):
@@ -154,8 +155,6 @@ class AntColony(object):
         prev = start
         for _ in range(len(self.time_travel) - 1):
             move = self.pick_move(self.pheromone[prev], self.time_travel[prev], visited)
-            # print(move)
-            # sleep(0.2)
 
             if move == None:
                 for edge in path:
@@ -191,7 +190,8 @@ class AntColony(object):
             norm_row = row / sum   
             # print(norm_row)
 
-            move = np_choice(self.all_inds, 1, p=norm_row)[0]
+            move = np_choice(self.all_inds, 1, p=norm_row.astype('float64'))[0]
+            # move = np_choice(self.all_inds, 1, p=norm_row)[0]
 
             return move
 
@@ -245,29 +245,30 @@ class AntColony(object):
                 H[i] = 1
         return H
 
-with open("data/data900.txt", "r") as f:  
-  data= f.read()
+if __name__ == '__main__':
+    with open("data/data10.txt", "r") as f:  
+        data= f.read()
 
-sys.stdin=StringIO(data)
-T=[]
-c=[[0,0,0]]
-n=[int(x) for x in sys.stdin.readline().split()]    #number of city excluding 0
-n=n[0]
-for i in range(n):
-    time_required=[int(x) for x in sys.stdin.readline().split()]           # start=[0]   end=[1]   service=[2]
-    c.append(time_required) #time window matrix
-for i in range(n+1):
-    d=[int(x) for x in sys.stdin.readline().split()]    
-    # d[i]=np.inf
-    T.append(d) 
+    sys.stdin=StringIO(data)
+    T=[]
+    c=[[0,0,0]]
+    n=[int(x) for x in sys.stdin.readline().split()]    #number of city excluding 0
+    n=n[0]
+    for i in range(n):
+        time_required=[int(x) for x in sys.stdin.readline().split()]           # start=[0]   end=[1]   service=[2]
+        c.append(time_required) #time window matrix
+    for i in range(n+1):
+        d=[int(x) for x in sys.stdin.readline().split()]    
+        # d[i]=np.inf
+        T.append(d) 
 
-time_travel=np.array(T)   
-time_window=np.array(c)
+    time_travel=np.array(T)   
+    time_window=np.array(c)
 
-begin=process_time()
-ant_colony = AntColony(time_travel,time_window, n+1, 1, 100, 0.6, alpha=1, beta=3, gamma=4, qo=0.3)
-shortest_path = ant_colony.run()
-print ("shorted_path: {}".format(shortest_path))
-finish=process_time()
+    begin=process_time()
+    ant_colony = AntColony(time_travel,time_window, n+1, 1, 100, 0.6, alpha=1, beta=3, gamma=4, qo=0.3)
+    shortest_path = ant_colony.run()
+    print ("shorted_path: {}".format(shortest_path))
+    finish=process_time()
 
-print('time taken', finish-begin)
+    print('time taken', finish-begin)
