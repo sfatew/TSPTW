@@ -70,6 +70,10 @@ class AntColony(object):
         # q=rand()
         fail_counter = 0
 
+        self.pheromone = self.pheromone * self.persistence 
+        self._spread_pheronome_gb(self.greedy_start())
+
+
         while i < interations:
         # while self.numconvergence < len(self.time_travel):
         #     self.numconvergence = 0
@@ -82,7 +86,7 @@ class AntColony(object):
 
                 if best_fail_path[1] < all_time_best_fail_path[1]:
                     all_time_best_fail_path = best_fail_path 
-                elif best_fail_path[1] == all_time_best_fail_path[1] and len(best_fail_path[0]) > len(all_time_best_fail_path[0]):
+                elif best_fail_path[1] == all_time_best_fail_path[1] and len(best_fail_path[0]) >= len(all_time_best_fail_path[0]):
                     print('.')
                     all_time_best_fail_path = best_fail_path
 
@@ -132,6 +136,56 @@ class AntColony(object):
 
                 # print(self.numconvergence)
         return all_time_shortest_path
+
+    def greedy_start(self):
+        '''travel from i to a node j
+    node j define by choseing the node with the lowest start serving time'''
+
+        route = [0 for i in range(len(self.time_travel))]
+
+        self.time_taken = 0
+
+        visited=[ 0 for i in range(len(self.time_travel))]    # mark came points
+
+        arrived = 0   # the time at which the salesman arrived at node i
+
+        start_service=0           # the time at which the salesman start service at node i
+
+        counter = 0        # number of city we have visited
+
+        next=0          # the next node chosen by greedy
+
+        # Starting from the 0th indexed city i.e., the first city
+        visited[0] = 1
+
+        while True:
+            min = np.inf
+
+            counter+=1
+            a=[0]
+            if counter > len(self.time_travel)-1:
+                break
+
+            for city in range(1,len(self.time_travel)):
+                # print(start_service) 
+                a[0]=start_service
+                if visited[city]==0:       
+                    arrived = a[0]+ self.time_window[route[counter-1]][2]+ self.time_travel[route[counter-1]][city]   
+                    a[0]= max(self.time_window[city][0], arrived)     
+                    # print(a[0])
+
+                    if a[0] < min:
+                        min = a[0]
+                        next = city
+                        # print(next)
+    
+            visited[next] = 1
+            route[counter] = next
+            start_service = min
+            self.time_taken = start_service
+
+        self.time_taken = self.time_taken + self.time_window[route[-1]][2] + self.time_travel[route[-1]][0]
+        return (route ,self.time_taken)
 
     def _spread_pheronome(self, all_paths, n_best):
         sorted_paths = sorted(all_paths, key=lambda x: x[1])

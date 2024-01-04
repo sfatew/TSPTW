@@ -19,4 +19,10 @@ import numpy as np
 # j=j**2
 # print((i*j)[:,1])
 
-print(255*0.4)
+# print(255*0.4)
+
+row= [12,54,6,54,56]
+row=np.array(row)
+
+move = (np.argmax(row))
+print(move)
