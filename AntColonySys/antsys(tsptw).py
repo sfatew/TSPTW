@@ -62,6 +62,7 @@ class AntColony(object):
         sleep(1)
         shortest_path = None
         all_time_shortest_path = ("placeholder", np.inf)
+        all_time_best_fail_path = ("placeholder", np.inf)
 
         interations = self.n_iterations
         i=0
@@ -73,11 +74,30 @@ class AntColony(object):
         # while self.numconvergence < len(self.time_travel):
         #     self.numconvergence = 0
             print(fail_counter)
-            all_paths = self.gen_all_paths()
+            all_paths, fail_path = self.gen_all_paths()
+
             if len(all_paths) == 0:
                 fail_counter += 1
-                # print(fail_counter)
+                best_fail_path = min(fail_path, key=lambda x: x[1])
+                print(best_fail_path)
+
+                if best_fail_path[1] < all_time_best_fail_path[1]:
+                    all_time_best_fail_path = best_fail_path 
+                elif best_fail_path[1] == all_time_best_fail_path[1] and len(best_fail_path[0]) > len(all_time_best_fail_path[0]):
+                    print('.')
+                    all_time_best_fail_path = best_fail_path
+
+                if q>self.qo:
+                    for edge in best_fail_path[0]:          #we take best fail path since we only use 1 best ant to spread pheromone
+                        self.pheromone[edge] = self.pheromone[edge] * self.persistence 
+                    self._spread_pheronome(fail_path, self.n_best)
+                else:
+                    for edge in all_time_best_fail_path[0]:
+                        self.pheromone[edge] = self.pheromone[edge] * self.persistence 
+                    self._spread_pheronome_gb(all_time_best_fail_path)
+
                 if fail_counter > 999:
+                    print(all_time_best_fail_path)
                     break
                 else:
                     continue
@@ -138,14 +158,18 @@ class AntColony(object):
 
     def gen_all_paths(self):
         all_paths = []
+        fail_paths = []
         for _ in range(self.n_ants):
             self.time=0
             # print(self.pheromone)
             # sleep(0.4)
             path = self.gen_path(0)
-            if path != None:
+            if len(path) == len(self.time_travel):
                 all_paths.append((path, self.time))
-        return all_paths
+            else:
+                fail_paths.append((path, self.penalty - self.time))
+
+        return all_paths, fail_paths
 
     def gen_path(self, start):
         path = []
@@ -157,16 +181,17 @@ class AntColony(object):
             move = self.pick_move(self.pheromone[prev], self.time_travel[prev], visited)
 
             if move == None:
-                for edge in path:
-                    self.pheromone[edge] = self.pheromone[edge] * self.persistence
+                # for edge in path:
+                #     self.pheromone[edge] = self.pheromone[edge] * self.persistence
 
-                path = (path, self.penalty - self.time)
-                self._spread_pheronome_gb(path)
+                # path = (path, self.penalty - self.time)
+                # self._spread_pheronome_gb(path)
 
-                return None
+                return path
             else:
                 path.append((prev, move))
                 self.gen_time_taken((prev, move))
+                # print(self.time)
                 prev = move
                 visited.add(move)
             
@@ -266,7 +291,7 @@ if __name__ == '__main__':
     time_window=np.array(c)
 
     begin=process_time()
-    ant_colony = AntColony(time_travel,time_window, n+1, 1, 100, 0.6, alpha=1, beta=3, gamma=4, qo=0.3)
+    ant_colony = AntColony(time_travel,time_window, n+1, 1, 100, 0.6, alpha=2, beta=3, gamma=4, qo=0.3)
     shortest_path = ant_colony.run()
     print ("shorted_path: {}".format(shortest_path))
     finish=process_time()
