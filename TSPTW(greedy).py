@@ -33,18 +33,23 @@ def greedy(T,c):
         for city in range(1,cities+1):
             # print(start_service) 
             a[0]=start_service
-            if visited[city]==0:       
+            if visited[city]==0:     
                 arrived = a[0]+ c[route[counter-1]][2]+ T[route[counter-1]][city]   
-                a[0]= max(c[city][0], arrived)     
-                # print(a[0])
+                # slack = c[city][1] - arrived
+
+                a[0]= max(c[city][0], arrived)    # start service time 
+                # # print(a[0])
                 if a[0] > c[city][1]:
                     raise ValueError('exceed time limit at node',city)
+                # hold = a[0]
 
-                if a[0] < min:
+                if a[0] < min and a[0] > 0:
                     min = a[0]
+                    # save = hold
                     next = city
                     # print(next)
    
+        # print('.')
         visited[next] = 1
         route[counter] = next
         start_service = min
@@ -70,7 +75,6 @@ if __name__ == '__main__':
     T=np.array(T)               #time travel matrix
 
     route = [0 for i in range(cities+1)]
-    print(route)
     time_taken = 0
 
     begin=time.time()

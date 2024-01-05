@@ -21,8 +21,9 @@ import numpy as np
 
 # print(255*0.4)
 
-row= [12,54,6,54,56]
-row=np.array(row)
+# row= [12,54,6,54,56]
+# row=np.array(row)
 
-move = (np.argmax(row))
-print(move)
+# move = (np.argmax(row))
+# print(move)
+

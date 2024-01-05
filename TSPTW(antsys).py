@@ -1,14 +1,15 @@
 import random as rn
 import numpy as np
-from numpy.random import choice as np_choice, rand
+from numpy.random import choice as np_choice, rand, randint
 import sys
 from io import StringIO
 from time import process_time, sleep
+from plot import plot
 
 
 class AntColony(object):
 
-    def __init__(self, time_travel, time_window, n_ants, n_best, n_iterations, persistence, alpha=1, beta=1,gamma=1, qo=0.5):
+    def __init__(self, time_travel, time_window, n_ants, n_best, n_iterations, persistence, alpha=1, beta=1,gamma=1, epsilon=1, qo=0.5):
         """
         Args:
             time_travel (2D numpy.array): Square matrix of time_travel. Diagonal is assumed to be np.inf.
@@ -34,10 +35,9 @@ class AntColony(object):
         self.alpha = alpha
         self.beta = beta
         self.gamma=gamma
-        self.qo= qo     # global best vs interation best pheromone update control
-        # self.maxpheromone = 0
-        # self.minpheromone = 0
-        # self.numconvergence = 0
+        self.epsilon = epsilon
+        self.qo= qo     
+
         self.time=0     #current travel time
         self.penalty = self._find_penalty()
 
@@ -53,7 +53,7 @@ class AntColony(object):
                 if j> max_timewindow:
                     max_timewindow = j
 
-        return (max_timetravel + max_timewindow) * len(self.time_travel) * 2
+        return (max_timetravel + max_timewindow) * len(self.time_travel) 
                     
 
     def run(self):
@@ -70,36 +70,30 @@ class AntColony(object):
         # q=rand()
         fail_counter = 0
 
-        self.pheromone = self.pheromone * self.persistence 
-        self._spread_pheronome_gb(self.greedy_start())
-
-
         while i < interations:
-        # while self.numconvergence < len(self.time_travel):
-        #     self.numconvergence = 0
+
             print(fail_counter)
             all_paths, fail_path = self.gen_all_paths()
+            # plotlen = []
 
             if len(fail_path) != 0:
                 best_fail_path = min(fail_path, key=lambda x: x[1])
                 print(best_fail_path)
-
-                if best_fail_path[1] < all_time_best_fail_path[1]:
+                print('len ',len(best_fail_path[0]))
+                # plotlen.append(len(best_fail_path[0]))
+                # plot(plotlen)
+                
+                if best_fail_path[1] <= all_time_best_fail_path[1]:
                     all_time_best_fail_path = best_fail_path 
-                elif best_fail_path[1] == all_time_best_fail_path[1] and len(best_fail_path[0]) >= len(all_time_best_fail_path[0]):
                     print('.')
-                    all_time_best_fail_path = best_fail_path
 
             if len(all_paths) == 0:
                 fail_counter += 1
 
-                # if q>self.qo:
-                for edge in best_fail_path[0]:          #we take best fail path since we only use 1 best ant to spread pheromone
-                        self.pheromone[edge] = self.pheromone[edge] * self.persistence 
+                self.pheromone = self.pheromone * self.persistence 
+
                 self._spread_pheronome(fail_path, self.n_best)
-                # else:
-                for edge in all_time_best_fail_path[0]:
-                        self.pheromone[edge] = self.pheromone[edge] * self.persistence 
+
                 self._spread_pheronome_gb(all_time_best_fail_path)
 
                 if fail_counter > 999:
@@ -117,94 +111,34 @@ class AntColony(object):
                     interations += self.n_iterations
                     print(interations)
 
-                    # self.maxpheromone = (1/(1-self.persistence)) * (1/all_time_shortest_path[1])
-                    # self.minpheromone = self.maxpheromone/(2* len(self.time_travel))
                     print(all_time_shortest_path[1])
                 
                 self.pheromone = self.pheromone * self.persistence 
 
-                # if q>self.qo:
+
                 self._spread_pheronome(all_paths, self.n_best)
                 if len(fail_path) != 0:
                         self._spread_pheronome(fail_path, self.n_best)
 
-                # else:
                 self._spread_pheronome_gb(all_time_shortest_path)
                 self._spread_pheronome_gb(all_time_best_fail_path)
 
                 i+=1
 
-                # print(self.numconvergence)
         return all_time_shortest_path
-
-    def greedy_start(self):
-        '''travel from i to a node j
-    node j define by choseing the node with the lowest start serving time'''
-
-        route = [0 for i in range(len(self.time_travel))]
-
-        self.time_taken = 0
-
-        visited=[ 0 for i in range(len(self.time_travel))]    # mark came points
-
-        arrived = 0   # the time at which the salesman arrived at node i
-
-        start_service=0           # the time at which the salesman start service at node i
-
-        counter = 0        # number of city we have visited
-
-        next=0          # the next node chosen by greedy
-
-        # Starting from the 0th indexed city i.e., the first city
-        visited[0] = 1
-
-        while True:
-            min = np.inf
-
-            counter+=1
-            a=[0]
-            if counter > len(self.time_travel)-1:
-                break
-
-            for city in range(1,len(self.time_travel)):
-                # print(start_service) 
-                a[0]=start_service
-                if visited[city]==0:       
-                    arrived = a[0]+ self.time_window[route[counter-1]][2]+ self.time_travel[route[counter-1]][city]   
-                    a[0]= max(self.time_window[city][0], arrived)     
-                    # print(a[0])
-
-                    if a[0] < min:
-                        min = a[0]
-                        next = city
-                        # print(next)
-    
-            visited[next] = 1
-            route[counter] = next
-            start_service = min
-            self.time_taken = start_service
-
-        self.time_taken = self.time_taken + self.time_window[route[-1]][2] + self.time_travel[route[-1]][0]
-        return (route ,self.time_taken)
 
     def _spread_pheronome(self, all_paths, n_best):
         sorted_paths = sorted(all_paths, key=lambda x: x[1])
         for path, time in sorted_paths[:n_best]:
             for move in path:
                 self.pheromone[move] += 999.0 / time
-                # if self.pheromone[move] > self.maxpheromone:
-                #     self.pheromone[move] = self.maxpheromone
-                # if self.pheromone[move] < self.minpheromone:
-                #     self.pheromone[move] = self.minpheromone
+
 
     def _spread_pheronome_gb(self,all_time_shortest_path):
         path, time = all_time_shortest_path
         for move in path:
                 self.pheromone[move] += 999.0 / time
-                # if self.pheromone[move] > self.maxpheromone:
-                #     self.pheromone[move] = self.maxpheromone
-                # if self.pheromone[move] < self.minpheromone:
-                #     self.pheromone[move] = self.minpheromone
+
 
     def gen_time_taken(self, i):     
         #i=(prev, move)
@@ -228,7 +162,7 @@ class AntColony(object):
             if len(path) == len(self.time_travel):
                 all_paths.append((path, self.time))
             else:
-                fail_paths.append((path, self.penalty - self.time))
+                fail_paths.append((path, self.penalty + 10*(self.time/len(path))))
 
         return all_paths, fail_paths
 
@@ -239,7 +173,7 @@ class AntColony(object):
         visited.add(start)
         prev = start
         for _ in range(len(self.time_travel) - 1):
-            move = self.pick_move(self.pheromone[prev], self.time_travel[prev], visited)
+            move = self.pick_move(self.pheromone[prev], self.time_travel[prev], visited, prev)
 
             if move == None:
                 # for edge in path:
@@ -260,28 +194,29 @@ class AntColony(object):
         self.time += self.time_travel[(prev, start)]
         return path
 
-    def pick_move(self, pheromone, time, visited):
+    def pick_move(self, pheromone, time, visited, prev):
         q=rand()
         pheromone = np.copy(pheromone)
         pheromone[list(visited)] = 0
 
         g = self.upper_bound_heuristic(time)
         h = self.lower_bound_heuristic(time)
+        t = self.time_trav(time, prev)
 
-        row = (pheromone ** self.alpha) * (g ** self.beta) * (h ** self.gamma)
+        row = (pheromone ** self.alpha) * (g ** self.beta) * (h ** self.gamma) * (t ** self.epsilon)
         # print(row)
         sum = row.sum()
+        # print(sum)
+
         if sum == 0:
             return None
         else:
             norm_row = row / sum   
             # print(norm_row)
+            # sleep(3)
 
-            if q>self.qo:
-                move = np_choice(self.all_inds, 1, p=norm_row.astype('float64'))[0]
-                # move = np_choice(self.all_inds, 1, p=norm_row)[0]
-            else:
-                move = (np.argmax(row))
+            move = np_choice(self.all_inds, 1, p=norm_row.astype('float64'))[0]
+
 
             return move
 
@@ -335,8 +270,32 @@ class AntColony(object):
                 H[i] = 1
         return H
 
+    def time_trav(self, time, prev):
+        T = time + self.time
+        T = [list(T)]
+        T.append(list(self.time_window[:,0]))
+        # print(T)
+
+        t = []
+        for i in range(len(T[0])):
+            t.append(max(T[0][i], T[1][i]))
+        t[prev] = np.inf
+        t = np.array(t)
+        t = t - self.time
+        for i in range(len(t)):
+            if t[i] == 0:
+                t[i] = 1
+            if t[i] == 1:
+                t[i] = 1.000000001
+
+        # print(prev)
+        # print(1/t)
+        # sleep(1)
+        return 1/t
+
+
 if __name__ == '__main__':
-    with open("data/data100.txt", "r") as f:  
+    with open("data/data900.txt", "r") as f:  
         data= f.read()
 
     sys.stdin=StringIO(data)
@@ -356,9 +315,9 @@ if __name__ == '__main__':
     time_window=np.array(c)
 
     begin=process_time()
-    ant_colony = AntColony(time_travel,time_window, n+1, 1, 100, 0.6, alpha=2, beta=3, gamma=4, qo=0.4)
+    ant_colony = AntColony(time_travel,time_window, 50, 1, 100, 0.8, alpha=1, beta=3, gamma=3, epsilon=4, qo=0.1)
     shortest_path = ant_colony.run()
-    print ("shorted_path: {}".format(shortest_path))
+    print ("shortest_path: {}".format(shortest_path))
     finish=process_time()
 
     print('time taken', finish-begin)
