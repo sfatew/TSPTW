@@ -295,7 +295,7 @@ class AntColony(object):
 
 
 if __name__ == '__main__':
-    with open("data/data900.txt", "r") as f:  
+    with open("data/data100.txt", "r") as f:  
         data= f.read()
 
     sys.stdin=StringIO(data)

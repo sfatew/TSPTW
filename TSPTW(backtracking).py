@@ -3,7 +3,7 @@ import numpy as np
 from io import StringIO
 import time
 
-with open("data/data10.txt", "r") as f:  
+with open("data/data100.txt", "r") as f:  
   data= f.read()
 
 sys.stdin=StringIO(data)
@@ -30,6 +30,7 @@ visited=[ False for i in range(n+1)]    # mark came points
 
 t_min= np.inf    # best solution so far
 T_min= np.inf    # shortest segment of the time matrix t
+c_min= np.inf
 t1_i=0           # the time at which the salesman start service at node i
 stored_ti=[]
 sol=[]
@@ -38,6 +39,10 @@ for i in range(n+1):
       for j in range(n+1):
         if i != j and T_min>T[i][j]:
             T_min=T[i][j]
+
+for i in range(1,n+1):
+   if c[i][2] < c_min:
+      c_min = c[i][2]
 
 def solution():
   global t_min
@@ -73,7 +78,7 @@ def Try(k):
         if k==n:
            solution()
         else:
-           g=t_i + T_min*(n-k+1)        #branch & bound
+           g=t_i + (T_min + c_min)*(n-k) + T_min        #branch & bound
            if g< t_min:
               Try(k+1)
 

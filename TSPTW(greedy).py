@@ -58,7 +58,7 @@ def greedy(T,c):
     time_taken = time_taken + c[route[-1]][2] + T[route[-1]][0]
 
 if __name__ == '__main__':
-    with open("data/data10.txt", "r") as f:  
+    with open("data/data1000.txt", "r") as f:  
         data= f.read()
 
     sys.stdin=StringIO(data)
