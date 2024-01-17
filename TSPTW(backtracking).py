@@ -3,7 +3,7 @@ import numpy as np
 from io import StringIO
 import time
 
-with open("data/data100.txt", "r") as f:  
+with open("data/data10.txt", "r") as f:  
   data= f.read()
 
 sys.stdin=StringIO(data)
@@ -79,7 +79,7 @@ def Try(k):
            solution()
         else:
            g=t_i + (T_min + c_min)*(n-k) + T_min        #branch & bound
-           if g< t_min:
+           if g < t_min:
               Try(k+1)
 
         visited[v]=False
