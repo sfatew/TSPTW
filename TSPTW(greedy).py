@@ -24,41 +24,28 @@ def greedy(T,c):
 
     while True:
         min = np.inf
-
         counter+=1
-        a=[0]
+        start_service_trial=[0]
         if counter > cities:
             break
-
         for city in range(1,cities+1):
-            # print(start_service) 
-            a[0]=start_service
+            start_service_trial[0]=start_service
             if visited[city]==0:     
-                arrived = a[0]+ c[route[counter-1]][2]+ T[route[counter-1]][city]   
-                # slack = c[city][1] - arrived
-
-                a[0]= max(c[city][0], arrived)    # start service time 
-                # # print(a[0])
-                if a[0] > c[city][1]:
+                arrived = start_service_trial[0]+ c[route[counter-1]][2]+ T[route[counter-1]][city]   
+                start_service_trial[0]= max(c[city][0], arrived)    # start service time 
+                if start_service_trial[0] > c[city][1]:
                     raise ValueError('exceed time limit at node',city)
-                # hold = a[0]
-
-                if a[0] < min and a[0] > 0:
-                    min = a[0]
-                    # save = hold
+                if start_service_trial[0] < min and start_service_trial[0] > 0:
+                    min = start_service_trial[0]
                     next = city
-                    # print(next)
-   
-        # print('.')
         visited[next] = 1
         route[counter] = next
         start_service = min
         time_taken = start_service
-
     time_taken = time_taken + c[route[-1]][2] + T[route[-1]][0]
 
 if __name__ == '__main__':
-    with open("data/data1000.txt", "r") as f:  
+    with open("data/data100.txt", "r") as f:  
         data= f.read()
 
     sys.stdin=StringIO(data)
